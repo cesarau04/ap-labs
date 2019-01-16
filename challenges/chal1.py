@@ -1,4 +1,5 @@
 s = "pwwkew"
+s = s.lower()
 largest = ""
 ph = ""
 for i in list(s):
@@ -7,7 +8,7 @@ for i in list(s):
   else:
   	if len(ph) > len(largest):
   		largest = ph
-  		ph = "" + i 
+  	ph = "" + i 
 
 print(largest)
 print(len(largest))
