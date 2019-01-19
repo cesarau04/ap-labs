@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 void main(){
     int c;
@@ -6,7 +7,7 @@ void main(){
     while((c=getchar()) != EOF){
          if (c==' ' && morethanonce){
              continue;
-         }else(){
+         }else{
              if (c==' '){
                  putchar(c);
                  morethanonce = true;
