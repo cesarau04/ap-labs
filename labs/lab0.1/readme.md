@@ -1,5 +1,7 @@
 # Compile
-Use gcc compiler, gcc file.c -o output_name and run it as ./outputname
+Use gcc compiler, gcc 'filename'.c --std=c89 -o 'executable'.out
+
+Run as ./'executable'.out
 
 # Credits
 All examples taken for C The Programming Language book.
