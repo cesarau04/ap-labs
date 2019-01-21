@@ -25,8 +25,7 @@ int main(){
 }
 
 int getline(char s[], int lim){
-    int c, i, balance, index;
-    balance = 0;
+    int c, i, index;
     char begincomment[3]    = "/*";
     char endcomment[3]      = "*/";
     char lasttwochars[3]    = "  ";
@@ -55,18 +54,8 @@ int getline(char s[], int lim){
                 if (i<=index){
                     index = i-1;
                 }
-                ++balance;
-                lasttwochars[0] = '*';
-                lasttwochars[1] = ' ';
-                lasttwochars[2] = '\0';
             }else if(strcmp(lasttwochars, endcomment) == 0){
-                --balance;
-                lasttwochars[0] = '/';
-                lasttwochars[1] = ' ';
-                lasttwochars[2] = '\0';
-                if(balance == 0){
-                    status = OUTCOMMENT;
-                }
+                status = OUTCOMMENT;
             }
         }
     }
