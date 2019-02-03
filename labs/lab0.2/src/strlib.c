@@ -1,5 +1,6 @@
 /* 
  * Library to get strlen, adding two strings, and finding a substring.
+ * Cesar Augusto Garcia Perez A01153737
 */
 #include <stddef.h>
 
@@ -53,7 +54,6 @@ int strfind(char *origin, char *substr)
 				return 1;
 			}
 			continue;
-		} else {
 		}
 	}
 	return 0;
