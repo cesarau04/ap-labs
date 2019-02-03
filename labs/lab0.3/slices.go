@@ -11,9 +11,10 @@ func Pic(dx, dy int) [][]uint8 {
 	//we need to iterate throu every pair (i,j) so that's why we have to for
 	for i := range matrix {
 		//we create an array inside an array
-		matrix[i] = make([]uint8, dx)
-		for j := range matrix {
-			matrix[i][j] = uint8(i^j)
+		matrix[i] = make([]uint8, dx, dx)
+		//use matrix[i] for variable size of dx side
+		for j := range matrix[i] {
+			matrix[i][j] = uint8((i+j)/2)
 		}
 	}
 	return matrix
