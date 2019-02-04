@@ -1,3 +1,8 @@
+/*
+* Source code taken from: https://github.com/adonovan/gopl.io/blob/master/ch6/geometry/geometry.go
+* To create methods we need to use the (p Pointer) notation in every "fuction" to transform it to method of the given struct.
+*/
+
 package main
 
 import (
