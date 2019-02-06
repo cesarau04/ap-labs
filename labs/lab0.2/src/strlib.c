@@ -28,7 +28,7 @@ int strlen(char *str)
 char *stradd(char *origin, char *addition)
 {
 	size_t i, j;
-	i = strlen(&*origin);
+	i = strlen(origin);
 	for (j = 0; addition[j] != '\0'; j++)
 		origin[i + j] = addition[j];
 	origin[i + j] = '\0';
@@ -38,8 +38,8 @@ char *stradd(char *origin, char *addition)
 int strfind(char *origin, char *substr)
 {
 	size_t i, x, y, lim;
-	x = strlen(&*origin);
-	y = strlen(&*substr);
+	x = strlen(origin);
+	y = strlen(substr);
 	if (y > x) {
 		return 0;
 	}
