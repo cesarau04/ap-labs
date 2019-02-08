@@ -14,33 +14,41 @@ int main(int argc, char **argv)
 	int fd, fd2;
 
 	if (argc == 2) {
-		char buff[MAX_SIZE];
 		fd = open(argv[1], O_RDONLY);
 		if (fd == -1) {
 			printf("Couldn't open file\n");
 			return ERROR_CODE;
 		}
 
+		char *buff;
+		buff = calloc(MAX_SIZE, sizeof(char));
 		while (read(fd, buff, MAX_SIZE - 1) != 0) {
 			buff[MAX_SIZE] = '\0';
 			printf("%s", buff);
+			memset(buff, 0, MAX_SIZE-1);
 		}
+
+		free(buff);
 		close(fd);
 	} else if (argc == 4) {
 		if (strcmp(argv[2], "-c") == 0) {
-			char *buff;
-			buff = calloc(MAX_SIZE, sizeof(char)); 
 			fd = open(argv[1], O_RDONLY);
-			fd2 = open(argv[3], O_WRONLY | O_CREAT, S_IRWXU);
+			fd2 = open(argv[3], O_WRONLY | O_CREAT, 0644);
 			if (fd == -1){
 				printf("Couldn't open %s", argv[1]);
 				close(fd);
 				printUsage();
 				return ERROR_CODE;
 			}
+
+			char *buff;
+			buff = calloc(MAX_SIZE, sizeof(char)); 
 			while (read(fd, buff, MAX_SIZE -1) != 0){
 				write(fd2, buff, MAX_SIZE-1);
+				memset(buff, 0, MAX_SIZE-1);
 			}
+
+			free(buff);
 			close(fd);
 			close(fd2);
 		}
