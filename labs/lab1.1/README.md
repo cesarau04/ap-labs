@@ -15,4 +15,4 @@ make
 
 ## mycat vs cat
 ![alt text](https://raw.githubusercontent.com/cesarau04/ap-labs/master/labs/lab1.1/timer/result.png)
-
+This comparation was done in a virtual machine using VMWare 15 using Lubuntu 18.10 64-bits, with 8 cores, 1 gb ram, and approx. 30-40% of real CPU usage.
