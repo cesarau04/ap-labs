@@ -6,7 +6,7 @@ make
 ```
 
 ## Usage
-It send a certain message to all open pst.
+It send a certain message to all open pts.
 ```bash
 ./broadcast [msg]
 
