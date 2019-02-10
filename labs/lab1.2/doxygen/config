@@ -1,0 +1,14 @@
+# This first one is optional
+PROJECT_NAME           = "LAB1.2"
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+# Set only the dirs you want
+INPUT                  = ../src/
+RECURSIVE              = YES
+SOURCE_BROWSER         = YES
+HAVE_DOT               = YES
+# Set according to your system
+DOT_NUM_THREADS        = 2
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
