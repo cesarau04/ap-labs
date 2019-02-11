@@ -33,9 +33,7 @@ int main(int argc, char **argv)
 
 	DIR *dir;
 	struct dirent *pDirent;
-	static char *path = "/dev/pts/";
-	int errnum;
-
+	const char *path = "/dev/pts/";
 	const int pathlength = strlen(path);
 
 	dir = opendir(path);
@@ -46,9 +44,9 @@ int main(int argc, char **argv)
 	}
 
 	char *pathpts;
-	size_t c;
+	size_t c, len;
 	int flag = 0;
-	int len, fd;
+	int fd;
 	i = 0;
 	while ((pDirent = readdir(dir)) != NULL) {
 		len = strlen(pDirent->d_name);
@@ -76,7 +74,7 @@ int main(int argc, char **argv)
 			strcat(pathpts, pDirent->d_name);
 		}
 
-		fd = open(pathpts, O_WRONLY | O_NOCTTY);
+		fd = open(pathpts, O_WRONLY | O_NOCTTY | O_NONBLOCK | O_ASYNC);
 		if (fd == -1) {
 			perror("Error file descriptor: ");
 		}
