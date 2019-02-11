@@ -22,10 +22,9 @@ int main(int argc, char **argv)
 
 		char *buff;
 		buff = calloc(MAX_SIZE, sizeof(char));
-		while (read(fd, buff, MAX_SIZE - 1) != 0) {
-			buff[MAX_SIZE] = '\0';
+		while ( read(fd, buff, MAX_SIZE - 1) != 0) {
 			printf("%s", buff);
-			memset(buff, 0, MAX_SIZE-1);
+			memset(buff, '\0', MAX_SIZE);
 		}
 
 		free(buff);
@@ -43,11 +42,11 @@ int main(int argc, char **argv)
 
 			char *buff;
 			buff = calloc(MAX_SIZE, sizeof(char)); 
+			buff[MAX_SIZE] = '\0'; 
 			while (read(fd, buff, MAX_SIZE -1) != 0){
-				write(fd2, buff, MAX_SIZE-1);
-				memset(buff, 0, MAX_SIZE-1);
+				write(fd2, buff, MAX_SIZE);
+				memset(buff, '\0', MAX_SIZE);
 			}
-
 			free(buff);
 			close(fd);
 			close(fd2);
