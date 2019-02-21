@@ -8,6 +8,16 @@ This is the first term challenge-based exam for the Advanced Programming Class. 
 - Social media or any type of chat is not permitted.
 - Any attempt of plagiarism will not be tolerated.
 
+Compiling
+---------
+For compile use gcc
+```
+gcc dmesg-analyzer.c
+```
+Run it as 
+```
+./a.out
+```
 
 General Instructions
 --------------------
