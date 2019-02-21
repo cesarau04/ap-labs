@@ -1,6 +1,5 @@
 # Prerequisites
 *.d
-
 *.c~
 *.swp
 *.out
