@@ -5,7 +5,7 @@
 #define INCOMMENT 1
 #define OUTCOMMENT 0
 
-int getline(char line[], int maxline);
+int get_line(char line[], int maxline);
 void copy(char to[], char from[]);
 
 int status = OUTCOMMENT;
@@ -17,14 +17,14 @@ int main(){
     /* char longest[MAXLINE];*/
 
     max = 80;
-    while ((len = getline(line, MAXLINE)) > 0){
+    while ((len = get_line(line, MAXLINE)) > 0){
         printf("%s\n", line);
         memset(line, 0, strlen(line)); /* clear lasttwochars*/
     }
     return 0;
 }
 
-int getline(char s[], int lim){
+int get_line(char s[], int lim){
     int c, i, index;
     char begincomment[3]    = "/*";
     char endcomment[3]      = "*/";
