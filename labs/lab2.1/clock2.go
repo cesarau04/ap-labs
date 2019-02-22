@@ -2,6 +2,7 @@
 package main
 
 import (
+	"os"
 	"io"
 	"log"
 	"net"
@@ -20,7 +21,17 @@ func handleConn(c net.Conn) {
 }
 
 func main() {
-	listener, err := net.Listen("tcp", "localhost:9090")
+	if len(os.Args) != 3 {
+		log.Printf("Usage: clock2.go -port [port]\n");
+		return
+	}
+	if os.Args[1] != "-port" {
+		log.Printf("2\n");
+		return;
+	}
+
+	localhost := "localhost:" + os.Args[2];
+	listener, err := net.Listen("tcp", localhost)
 	if err != nil {
 		log.Fatal(err)
 	}
