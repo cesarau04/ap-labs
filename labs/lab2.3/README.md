@@ -13,7 +13,7 @@ make
 USAGE
 -----
 ```
-./cross-ref [file.txt]
+./cross-ref [file]
 ```
 General Requirements and Considerations
 ---------------------------------------
