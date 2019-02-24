@@ -1,10 +1,5 @@
 Lab 2.3 - Cross-referencer
 ==========================
-Write a cross-referencer in C that prints a list of all words in a document, and, for each word, a list of the line numbers on which it occurs. Remove noise words like `the`, `and`, and so on.
-
-```
-./cross-ref document.txt
-```
 BUILDING
 --------
 ```
@@ -12,9 +7,12 @@ make
 ```
 USAGE
 -----
+Write a cross-referencer in C that prints a list of all words in a document, and, for each word, a list of the line numbers on which it occurs. Remove noise words like `the`, `and`, and so on.
+
 ```
-./cross-ref [file]
+./cross-ref document.txt
 ```
+
 General Requirements and Considerations
 ---------------------------------------
 - Use the `cross-ref.c` file for your implementation.
