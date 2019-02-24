@@ -26,7 +26,7 @@ struct tnode *addnode(struct tnode *p, char *w, char *l);
 void treeprint(struct tnode *p);
 void cleantoken(char *str);
 struct tnode *talloc(void);
-char *strdup2 (char *str);
+char *strdup2(char *str);
 int isfamousword(char *t);
 
 int main(int argc, char **argv)
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	struct tnode *root;	
+	struct tnode *root;
 	root = NULL;
 
 	char *buff;
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	char separator[2] = " ";
 	off_t offset = 0;
 	int linenumber = 1;
-	
+
 	int indexarray = 0;
 	while (read(fd2, buff, BUFF_SIZE - 1)) {
 		int i;
@@ -94,10 +94,12 @@ int main(int argc, char **argv)
 		token = strtok(line, separator);
 		while (token != NULL) {
 			cleantoken(token);
-			if (isalpha(token[0]) != 0){
-				if (isfamousword(token) == 0){	
-					sprintf(linenumberstr, "%d,", linenumber);
-					root = addnode(root, token, linenumberstr);
+			if (isalpha(token[0]) != 0) {
+				if (isfamousword(token) == 0) {
+					sprintf(linenumberstr, "%d,",
+						linenumber);
+					root =
+					    addnode(root, token, linenumberstr);
 				}
 			}
 			token = strtok(NULL, separator);
@@ -106,16 +108,17 @@ int main(int argc, char **argv)
 	}
 	close(fd);
 	printf("%s  %-30s\t %s\n", "COUNT", "WORD", "LINES");
-	printf("------------------------------------------------------------------------------------------\n");
+	printf
+	    ("------------------------------------------------------------------------------------------\n");
 	treeprint(root);
 	return 0;
 }
 
-
-struct tnode *addnode(struct tnode *p, char *w, char *l){
+struct tnode *addnode(struct tnode *p, char *w, char *l)
+{
 	int cond;
-	
-	if (p == NULL){
+
+	if (p == NULL) {
 		p = talloc();
 		p->word = strdup2(w);
 		p->count = 1;
@@ -123,12 +126,12 @@ struct tnode *addnode(struct tnode *p, char *w, char *l){
 		p->lines[0] = '\0';
 		strcpy(p->lines, l);
 		p->left = p->right = NULL;
-	}else if ((cond = strcmp(w, p->word)) == 0){
+	} else if ((cond = strcmp(w, p->word)) == 0) {
 		p->count++;
-		strcat(p->lines, l);	
-	}else if (cond < 0) {
+		strcat(p->lines, l);
+	} else if (cond < 0) {
 		p->left = addnode(p->left, w, l);
-	}else {
+	} else {
 		p->right = addnode(p->right, w, l);
 	}
 	return p;
@@ -143,25 +146,27 @@ void treeprint(struct tnode *p)
 	}
 }
 
-struct tnode *talloc(void){
-	return (struct tnode *) malloc(sizeof(struct tnode));
+struct tnode *talloc(void)
+{
+	return (struct tnode *)malloc(sizeof(struct tnode));
 }
 
 char *strdup2(char *str)
 {
 	char *p;
-	p = (char *) malloc(strlen(str)+1); 
+	p = (char *)malloc(strlen(str) + 1);
 	if (p != NULL)
 		strcpy(p, str);
 	return p;
 }
 
-int isfamousword(char *t){
+int isfamousword(char *t)
+{
 	char *tcopy;
 	tcopy = (char *)malloc(WORD_SIZE);
 	size_t j;
-	for (int i = 0; i < BANNED_WORDS; ++i){
-		for (j = 0; j < strlen(t); ++j){
+	for (int i = 0; i < BANNED_WORDS; ++i) {
+		for (j = 0; j < strlen(t); ++j) {
 			tcopy[j] = toupper(t[j]);
 		}
 		tcopy[j] = '\0';
@@ -170,6 +175,7 @@ int isfamousword(char *t){
 	}
 	return 0;
 }
+
 void cleantoken(char *str)
 {
 	int index;
@@ -185,11 +191,11 @@ void cleantoken(char *str)
 			++i;
 		}
 		str[i] = '\0';
-		for (i = (i - 1); isalpha(str[i]) == 0 && i>-1; --i){
+		for (i = (i - 1); isalpha(str[i]) == 0 && i > -1; --i) {
 			str[i] = '\0';
 		}
 	} else {
-		for (i = strlen(str) - 1; isalpha(str[i]) == 0 && i>-1; --i){
+		for (i = strlen(str) - 1; isalpha(str[i]) == 0 && i > -1; --i) {
 			str[i] = '\0';
 		}
 	}
