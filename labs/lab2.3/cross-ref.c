@@ -27,7 +27,7 @@ void treeprint(struct tnode *p);
 void cleantoken(char *str);
 struct tnode *talloc(void);
 char *strdup2 (char *str);
-int famouswords(char *t);
+int isfamousword(char *t);
 
 int main(int argc, char **argv)
 {
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 		while (token != NULL) {
 			cleantoken(token);
 			if (isalpha(token[0]) != 0){
-				if (famouswords(token) == 0){	
+				if (isfamousword(token) == 0){	
 					sprintf(linenumberstr, "%d,", linenumber);
 					root = addnode(root, token, linenumberstr);
 				}
@@ -156,7 +156,7 @@ char *strdup2(char *str)
 	return p;
 }
 
-int famouswords(char *t){
+int isfamousword(char *t){
 	char *tcopy;
 	tcopy = (char *)malloc(WORD_SIZE);
 	size_t j;
