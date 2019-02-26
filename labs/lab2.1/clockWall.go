@@ -8,13 +8,14 @@ import(
 	"strings"
 	"sync"
 	"io"
+	//"time"
+	"bytes"
 )
 
 var wg sync.WaitGroup
 
 func readConnection(city, socket string) {
 	defer wg.Done()
-
 	conn, err := net.Dial("tcp", socket)
 	defer conn.Close()
 	if err != nil {
@@ -22,11 +23,14 @@ func readConnection(city, socket string) {
 	}
 
 	for {
-		fmt.Printf("%s: ", city)
-		_, err := io.CopyN(os.Stdout, conn, 9)
+		s := city + ": "
+		buf := bytes.NewBufferString(s)
+		_, err := io.CopyN(buf, conn, 9)
 		if err != nil {
 			log.Fatal(err)
+			return;
 		}
+		fmt.Printf("%s", buf.String())
 	}
 }
 
