@@ -36,7 +36,7 @@ func readConnection(city, socket string) {
 
 func main(){
 	if len(os.Args) < 2{
-		fmt.Printf("Usage: ./clockWall city=localhost:port");
+		fmt.Printf("Usage: ./clockWall city=localhost:port\n");
 		return;
 	}
 
