@@ -8,7 +8,6 @@ import(
 	"strings"
 	"sync"
 	"io"
-	//"time"
 	"bytes"
 )
 
@@ -20,6 +19,7 @@ func readConnection(city, socket string) {
 	defer conn.Close()
 	if err != nil {
 		log.Fatal(err)
+		return;
 	}
 
 	for {
@@ -44,8 +44,7 @@ func main(){
 	for i := 1; i < len(os.Args); i++ {
 		s := strings.Split(os.Args[i], "=")
 		city, socket := s[0], s[1]
-	  go readConnection(city, socket)
+		go readConnection(city, socket)
 	}
-
 	wg.Wait()
 }
