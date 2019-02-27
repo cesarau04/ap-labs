@@ -7,7 +7,7 @@ make
 ```
 USAGE
 -----
-Write a cross-referencer in C that prints a list of all words in a document, and, for each word, a list of the line numbers on which it occurs. Remove noise words like `the`, `and`, and so on. For the whole list check out [wordsban](.\wordsban.txt)
+Write a cross-referencer in C that prints a list of all words in a document, and, for each word, a list of the line numbers on which it occurs. Remove noise words like `the`, `and`, and so on. For the whole list check out [wordsban.txt](./wordsban.txt)
 
 ```
 ./cross-ref document.txt
