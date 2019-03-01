@@ -1,5 +1,5 @@
 /*
- * The coloring functions were made by Pradeep Padala.
+ * The coloring function was made by Pradeep Padala.
  * You can find more info here https://www.linuxjournal.com/article/8603
  */
 #include <stdio.h>
