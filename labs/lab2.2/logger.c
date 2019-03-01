@@ -22,68 +22,76 @@
 #define CYAN			6
 #define	WHITE			7
 
-void textcolor(int attr, int fg, int bg)
+void
+textcolor (int attr, int fg, int bg)
 {
-	char command[13];
-	/* Command is the control command to the terminal */
-	sprintf(command, "%c[%d;%d;%dm", 0x1B, attr, fg + 30, bg + 40);
-	printf("%s", command);
+  char command[13];
+  /* Command is the control command to the terminal */
+  sprintf (command, "%c[%d;%d;%dm", 0x1B, attr, fg + 30, bg + 40);
+  printf ("%s", command);
 }
 
-int infof(const char *format, ...){
-	va_list arg;
-	int done;
+int
+infof (const char *format, ...)
+{
+  va_list arg;
+  int done;
 
-	textcolor(BRIGHT, BLUE, HIDDEN);
-	printf("INFO: ");
-	textcolor(RESET, WHITE, HIDDEN);
-	
-	va_start(arg, format);
-	done = vprintf(format, arg);
-	va_end(arg);
-	return done;
+  textcolor (BRIGHT, BLUE, HIDDEN);
+  printf ("INFO: ");
+  textcolor (RESET, WHITE, HIDDEN);
+
+  va_start (arg, format);
+  done = vprintf (format, arg);
+  va_end (arg);
+  return done;
 }
 
-int warnf(const char *format, ...){
-	va_list arg;
-	int done;
+int
+warnf (const char *format, ...)
+{
+  va_list arg;
+  int done;
 
-	textcolor(BRIGHT, YELLOW, HIDDEN);
-	printf("WARN: ");
-	textcolor(RESET, WHITE, HIDDEN);
-	
-	va_start(arg, format);
-	done = vprintf(format, arg);
-	va_end(arg);
-	return done;
+  textcolor (BRIGHT, YELLOW, HIDDEN);
+  printf ("WARN: ");
+  textcolor (RESET, WHITE, HIDDEN);
+
+  va_start (arg, format);
+  done = vprintf (format, arg);
+  va_end (arg);
+  return done;
 }
 
-int errorf(const char *format, ...){
-	va_list arg;
-	int done;
+int
+errorf (const char *format, ...)
+{
+  va_list arg;
+  int done;
 
-	textcolor(BRIGHT, RED, HIDDEN);
-	printf("ERROR: ");
-	textcolor(RESET, WHITE, HIDDEN);
-	
-	va_start(arg, format);
-	done = vprintf(format, arg);
-	va_end(arg);
-	return done;
+  textcolor (BRIGHT, RED, HIDDEN);
+  printf ("ERROR: ");
+  textcolor (RESET, WHITE, HIDDEN);
+
+  va_start (arg, format);
+  done = vprintf (format, arg);
+  va_end (arg);
+  return done;
 }
 
-int panicf(const char *format, ...){
-	va_list arg;
-	int done;
+int
+panicf (const char *format, ...)
+{
+  va_list arg;
+  int done;
 
-	textcolor(BRIGHT, WHITE, RED);
-	printf("PANIC:");
-	textcolor(RESET, WHITE, HIDDEN);
-	printf(" ");
+  textcolor (BRIGHT, WHITE, RED);
+  printf ("PANIC:");
+  textcolor (RESET, WHITE, HIDDEN);
+  printf (" ");
 
-	va_start(arg, format);
-	done = vprintf(format, arg);
-	va_end(arg);
-	return done;
+  va_start (arg, format);
+  done = vprintf (format, arg);
+  va_end (arg);
+  return done;
 }
-
