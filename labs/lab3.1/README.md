@@ -13,4 +13,8 @@ For cleaning the folder:
 make clean
 ```
 
-
+Usage
+-----
+```
+./monitor directoryname
+```
