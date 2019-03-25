@@ -18,13 +18,16 @@ Your program will generate a `decoded.txt` file witg the result.
 
 How to test?
 ------------
-- `Ctrl + C` this way is the easiest.
-- Get process ID
+1) `Ctrl + C` this way is the easiest.
+
+or
+
+2) Get process ID
 ```
 ps aux | grep base64
 ```
 
-- Send the signals
+   Send the signals
 ```
 kill -SIGINT <PID>
 kill -SIGINFO <PID>
