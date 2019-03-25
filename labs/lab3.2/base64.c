@@ -184,7 +184,7 @@ void printUsage()
 static void printprogress(int sig)
 {
 	unsigned long progress = (byteswritten * 100) / size;
-	printf("signal: %d; progress: %ld\n", sig, progress);
+	infof("signal: %d; progress: %ld\n", sig, progress);
 }
 
 int main(int argc, char **argv)
