@@ -1,6 +1,7 @@
 Lab 3.2 - Progress Notifier with Signals
 ========================================
 This program encode a given text in Base64 (code taken from [wikibooks](https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64)) the objective is to handle signals SIGINT & SIGINFO (only in BSD, see [issue](https://github.com/golang/go/issues/1653)).
+
 Encoding
 --------
 ```
