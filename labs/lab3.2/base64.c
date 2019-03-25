@@ -184,7 +184,6 @@ int main(int argc, char** argv){
 		}
 		stat(argv[2], &st);
 		size = st.st_size;
-		printf("size of file: %ld", size);
 		fdwrite = open(ENCODED_FILENAME, O_WRONLY | O_CREAT | O_APPEND, 0755);
 		if (fdwrite == -1){
 			errorf("Cound't create new file\n");
@@ -220,7 +219,6 @@ int main(int argc, char** argv){
 		}
 		stat(argv[2], &st);
 		size = st.st_size;
-		printf("size of file: %ld", size);
 		fdwrite = open(DECODED_FILENAME, O_WRONLY | O_CREAT | O_APPEND, 0755);
 		if (fdwrite == -1){
 			errorf("Cound't create new file\n");
