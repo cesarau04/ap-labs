@@ -1,5 +1,5 @@
 CC       = gcc
-CFLAGS   = -Wall
+CFLAGS   = -Wall -g
 LDFLAGS  =
 OBJFILES = mytop.o
 TARGET   = mytop
