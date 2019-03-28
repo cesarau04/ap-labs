@@ -152,7 +152,6 @@ void *findInfoForProcess(void *param){
 	struct threadstruct* ts;
 	ts = (struct threadstruct *) param;
 	/* Here goes the search for info of each process */
-	printf("searching info of pid: %u\n", ts->mynode->pid);
 	return (void *) (size_t) ts->pid;
 }
 
