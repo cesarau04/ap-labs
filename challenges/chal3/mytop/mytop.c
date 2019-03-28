@@ -16,10 +16,11 @@ void clear();
 bool isDirectory(unsigned char *type);
 bool hasPidFormat(char *filename);
 struct process *talloc(void);
+struct threadstruct *threadalloc(void);
 struct process *addnode(struct process *p, unsigned int *pid);
 unsigned int parseUnsigedInt(char * str);
 void treeprint(struct process *p);
-static void *findInfoForProcess(void *argv);
+void *findInfoForProcess(void *argv);
 
 struct process {
   unsigned int pid;
@@ -38,7 +39,8 @@ struct threadstruct {
 	unsigned int pid;
 };
 
-size_t threadsopen = 0;
+int threadsopen = 0;
+pthread_t threadslist[1000];
 
 int main(){
 	DIR *dir;
@@ -60,7 +62,11 @@ int main(){
 		param = parseUnsigedInt(pDirent->d_name);
 		root = addnode(root, &param);	
 	}
-	treeprint(root);
+
+	for(int i = 0; i < threadsopen; i++){
+		pthread_join(threadslist[i], NULL);	
+	}
+	//treeprint(root);
   //clear();
   return 0;
 }
@@ -89,6 +95,11 @@ struct process *talloc(void)
 	return (struct process *)malloc(sizeof(struct process));
 }
 
+struct threadstruct *threadalloc(void)
+{
+	return (struct threadstruct *)malloc(sizeof(struct threadstruct));
+}
+
 struct process *addnode(struct process *p, unsigned int *pid)
 {
 	int cond;
@@ -99,7 +110,17 @@ struct process *addnode(struct process *p, unsigned int *pid)
 		p->p_name = (char *) malloc(NAMEFILE_SIZE * sizeof(char));
 		p->state  = (char *) malloc(STATE_SIZE    * sizeof(char));
 		p->left = p->right = NULL;
-		// aqui llamada a thread.
+
+		struct threadstruct *ts;
+		ts = threadalloc();
+		ts->mynode = p;
+		ts->pid    = *pid;
+		int s = pthread_create(&threadslist[threadsopen++], NULL, findInfoForProcess, (void *) ts);
+		if (s != 0){
+			printf("Couldn't create thread for: %u", *pid);
+			exit(EXIT_FAILURE);
+		}
+		threadsopen++;
 	} else if ((cond = (*pid > p->pid) ? -1 : 1 ) < 0) {
 		p->left = addnode(p->left, pid);
 	} else {
@@ -127,6 +148,12 @@ void treeprint(struct process *p)
 	}
 }
 
-static void *findInfoForProcess(void *argv){
-
+void *findInfoForProcess(void *param){
+	struct threadstruct* ts;
+	ts = (struct threadstruct *) param;
+	/* Here goes the search for info of each process */
+	printf("searching info of pid: %u\n", ts->mynode->pid);
+	return (void *) (size_t) ts->pid;
 }
+
+
