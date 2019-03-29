@@ -59,23 +59,18 @@ func handleConn(conn net.Conn) {
 	ch := make(chan string) // outgoing client messages
 	go clientWriter(conn, ch)
 	clientsConnected++
-	who := "user" + strconv.Itoa(clientsConnected)
-	usersChannel[who] = conn
-	ch <- "!< " + who + " >!"
-	messages <- "irc-server > [" + who + "] has arrived"
-	entering <- ch
-	fmt.Printf("irc-server > New connected user [%s]\n", who)
+	who := ""
 
 	input := bufio.NewScanner(conn)
 	for input.Scan() {
 		msg := input.Text()
 		fmt.Printf("DATA: %s\n", msg)
 		if msg == "/users" {
-			usersStr := "| "
-			for i := 1; i < clientsConnected+1; i++ {
-				usersStr += "user" + strconv.Itoa(i) + " | "
+			fmt.Fprintf(conn, "irc-server > ")
+			for key := range usersChannel {
+				fmt.Fprintf(conn, "| %s |", key)
 			}
-			fmt.Fprintf(conn, "irc-server > %s\n", usersStr)
+			fmt.Fprintln(conn, "")
 		} else if msg == "/time" {
 			fmt.Fprintf(conn, "irc-server > %s\n", time.Now().Format("Mon Jan _2 15:04:05 2006"))
 		} else if matches, _ := regexp.MatchString("^/msg user[0-9]+ .+", msg); matches {
@@ -103,9 +98,13 @@ func handleConn(conn net.Conn) {
 				fmt.Fprintf(conn, "irc-server > name: %s, ip: %s\n", stringSlice[1], usersChannel[stringSlice[1]].RemoteAddr().String())
 			}
 		} else if matches, _ := regexp.MatchString("^<meta>.+", msg); matches {
-			fmt.Printf("User received==>data: %s\n", msg)
 			stringSlice := strings.Split(msg, ">")
-			fmt.Printf("--> %s", stringSlice[1])
+			who = stringSlice[1]
+			messages <- "irc-server > [" + who + "] has arrived"
+			usersChannel[who] = conn
+			ch <- "You're connected! " + who + ""
+			entering <- ch
+			fmt.Printf("irc-server > New connected user [%s]\n", who)
 		} else {
 			messages <- who + "> " + msg
 		}
