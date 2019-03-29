@@ -22,11 +22,10 @@ import (
 type client chan<- string // an outgoing message channel
 
 var (
-	clientsConnected int
-	entering         = make(chan client)
-	leaving          = make(chan client)         // channel for leaving clients
-	messages         = make(chan string)         // all incoming client messages
-	usersChannel     = make(map[string]net.Conn) //Here come the connection per user
+	entering     = make(chan client)
+	leaving      = make(chan client)         // channel for leaving clients
+	messages     = make(chan string)         // all incoming client messages
+	usersChannel = make(map[string]net.Conn) //Here come the connection per user
 )
 
 func broadcaster() {
@@ -45,7 +44,6 @@ func broadcaster() {
 
 		case cli := <-leaving:
 			delete(clients, cli)
-			clientsConnected--
 			close(cli)
 		}
 	}
@@ -57,7 +55,6 @@ func broadcaster() {
 func handleConn(conn net.Conn) {
 	ch := make(chan string) // outgoing client messages
 	go clientWriter(conn, ch)
-	clientsConnected++
 	who := ""
 
 	input := bufio.NewScanner(conn)
@@ -76,7 +73,7 @@ func handleConn(conn net.Conn) {
 			stringSlice := strings.Split(msg, " ")
 			lenSlice := len(stringSlice)
 			if connection, ok := usersChannel[stringSlice[1]]; ok {
-				fmt.Fprintf(connection, "%s [privatemsg] > ", stringSlice[1])
+				fmt.Fprintf(connection, "%s [privatemsg] > ", who)
 				for i := 2; i < lenSlice; i++ {
 					fmt.Fprintf(connection, "%s ", stringSlice[i])
 				}
@@ -97,7 +94,7 @@ func handleConn(conn net.Conn) {
 			who = stringSlice[1]
 			messages <- "irc-server > [" + who + "] has arrived"
 			usersChannel[who] = conn
-			ch <- "irc-server > You're connected! " + who + ""
+			ch <- "irc-server > Your user [" + who + "] is successfully logged"
 			entering <- ch
 			fmt.Printf("irc-server > New connected user [%s]\n", who)
 		} else {
@@ -108,7 +105,7 @@ func handleConn(conn net.Conn) {
 
 	leaving <- ch
 	messages <- "irc-server > [" + who + "] left"
-	fmt.Printf("irc-server > [%s] left\n", who)
+	fmt.Printf("[%s] left\n", who)
 	conn.Close()
 }
 
@@ -131,7 +128,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	clientsConnected = 0
 	go broadcaster()
 	fmt.Printf("irc-server > Ready for receiving new clients\n")
 	for {
