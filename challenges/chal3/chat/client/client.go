@@ -7,23 +7,31 @@
 package main
 
 import (
+	"flag"
 	"io"
 	"log"
 	"net"
 	"os"
+	"strings"
 )
 
 var (
-	username   string
 	prefixName io.Reader
 )
 
 //!+
 func main() {
-	conn, err := net.Dial("tcp", "localhost:8000")
+	username := flag.String("user", "default-user", "")
+	server := flag.String("server", "localhost:9000", "")
+	flag.Parse()
+	if blank := strings.TrimSpace(*username) == ""; blank {
+		log.Panic("Username cannot be only space")
+	}
+	conn, err := net.Dial("tcp", *server)
 	if err != nil {
 		log.Fatal(err)
 	}
+	io.WriteString(conn, "<meta>"+*username+"\n")
 	done := make(chan struct{})
 	go func() {
 		io.Copy(os.Stdout, conn) // NOTE: ignoring errors

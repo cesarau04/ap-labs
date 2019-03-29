@@ -9,6 +9,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -68,6 +69,7 @@ func handleConn(conn net.Conn) {
 	input := bufio.NewScanner(conn)
 	for input.Scan() {
 		msg := input.Text()
+		fmt.Printf("DATA: %s\n", msg)
 		if msg == "/users" {
 			usersStr := "| "
 			for i := 1; i < clientsConnected+1; i++ {
@@ -100,6 +102,10 @@ func handleConn(conn net.Conn) {
 			} else {
 				fmt.Fprintf(conn, "irc-server > name: %s, ip: %s\n", stringSlice[1], usersChannel[stringSlice[1]].RemoteAddr().String())
 			}
+		} else if matches, _ := regexp.MatchString("^<meta>.+", msg); matches {
+			fmt.Printf("User received==>data: %s\n", msg)
+			stringSlice := strings.Split(msg, ">")
+			fmt.Printf("--> %s", stringSlice[1])
 		} else {
 			messages <- who + "> " + msg
 		}
@@ -122,9 +128,11 @@ func clientWriter(conn net.Conn, ch <-chan string) {
 
 //!+main
 func main() {
-	port := 8000
-	listener, err := net.Listen("tcp", "localhost:"+strconv.Itoa(port))
-	fmt.Printf("irc-server > Simple IRC Server started at localhost:%d\n", port)
+	host := flag.String("host", "localhost", "")
+	port := flag.String("port", "9000", "")
+	flag.Parse()
+	listener, err := net.Listen("tcp", *host+":"+*port)
+	fmt.Printf("irc-server > Simple IRC Server started at %s:%s\n", *host, *port)
 	if err != nil {
 		log.Fatal(err)
 	}
