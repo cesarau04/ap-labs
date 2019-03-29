@@ -76,7 +76,7 @@ func handleConn(conn net.Conn) {
 			fmt.Fprintf(conn, "irc-server > %s\n", usersStr)
 		} else if msg == "/time" {
 			fmt.Fprintf(conn, "irc-server > %s\n", time.Now().Format("Mon Jan _2 15:04:05 2006"))
-		} else if matches, _ := regexp.MatchString("/msg user[0-9]+ .+", msg); matches {
+		} else if matches, _ := regexp.MatchString("^/msg user[0-9]+ .+", msg); matches {
 			stringSlice := strings.Split(msg, " ")
 			numberAsked := strings.Split(stringSlice[1], "r")
 			if value, _ := strconv.Atoi(numberAsked[1]); value > len(usersChannel) {
@@ -86,12 +86,13 @@ func handleConn(conn net.Conn) {
 				fmt.Println(stringSlice[1])
 				fmt.Printf("%T\n", stringSlice[1])
 				fmt.Println(lenSlice)
+				fmt.Fprintf(usersChannel[stringSlice[1]], "%s [private] > ", who)
 				for i := 2; i < lenSlice; i++ {
 					fmt.Fprintf(usersChannel[stringSlice[1]], "%s ", stringSlice[i])
 				}
 			}
 			fmt.Fprintf(usersChannel[stringSlice[1]], "\n")
-		} else if matches, _ := regexp.MatchString("/user user[0-9]+", msg); matches {
+		} else if matches, _ := regexp.MatchString("^/user user[0-9]+$", msg); matches {
 			stringSlice := strings.Split(msg, " ")
 			numberAsked := strings.Split(stringSlice[1], "r")
 			if value, _ := strconv.Atoi(numberAsked[1]); value > len(usersChannel) {
