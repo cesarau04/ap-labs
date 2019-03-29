@@ -17,13 +17,13 @@
 #define FD_PATH       "/fd/"    //PROC_PATH + PID + FD_PATH
 #define MEMORY_PATH   "/statm"  //PROC_PATH + PID + MEMORY_PATH
 #define STATUS_PATH   "/status" 
-#define NAMEFILE_SIZE 128
+#define NAMEFILE_SIZE 256
 #define STATE_SIZE    20
 #define MAX_PATH_SIZE 50
 #define INT_TO_STR_SIZE 11
 #define BUFF_SIZE     2048
-#define ATTR_SIZE     64
-#define INFO_SIZE     512
+#define ATTR_SIZE     512
+#define INFO_SIZE     2048
 
 
 void clear();
@@ -83,16 +83,16 @@ int main(){
 		for(int i = 0; i < threadsopen; i++){
 			pthread_join(threadslist[i], NULL);	
 		}
-		/*printf("| %-11s | %-11s | %-45s | %-20s | %-11s | %-11s | %-11s |\n", */
-				/*"PID", "PPID", "NAME", "STATUS", "MEMORY", "#THREADS", "OPENFILES");*/
-		/*for (int u = 0; u < 143; u++){*/
-			/*printf("-");*/
-		/*}*/
-		/*printf("-\n");*/
-		/*treeprint(root);*/
+		printf("| %-11s | %-11s | %-45s | %-20s | %-11s | %-11s | %-11s |\n", 
+				"PID", "PPID", "NAME", "STATUS", "MEMORY", "#THREADS", "OPENFILES");
+		for (int u = 0; u < 143; u++){
+			printf("-");
+		}
+		printf("-\n");
+		treeprint(root);
 		treeclean(root);
 		threadsopen = 0;
-		/*sleep(1);*/
+		/*sleep(3);*/
 	  clear();
 	}
   return EXIT_SUCCESS;
@@ -233,7 +233,7 @@ void *findInfoForProcess(void *param){
 		printf("Couldn't open statuspath: %s", statuspath);
 		exit(EXIT_FAILURE);
 	}
-	free(statuspath);
+	/*free(statuspath);*/
 	char *attr, *info;
 	attr = (char *) malloc(ATTR_SIZE*sizeof(char));
 	info = (char *) malloc(INFO_SIZE*sizeof(char));
@@ -247,9 +247,8 @@ void *findInfoForProcess(void *param){
 		dataph[i] = '\0';
 		offset += ++i;
 		lseek(fd, offset, SEEK_SET);
-		int j = 0;
-		for (; dataph[j] != ':' || dataph[j] != '\0'; j++){
-			printf("pid: %u\t j: %d\n", ts->pid, j);
+		int j;
+		for (j = 0; dataph[j] != ':'; j++){
 			attr[j] = dataph[j];
 		}
 		attr[j] = '\0';
