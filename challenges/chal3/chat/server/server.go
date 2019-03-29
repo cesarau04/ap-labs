@@ -24,9 +24,9 @@ type client chan<- string // an outgoing message channel
 var (
 	clientsConnected int
 	entering         = make(chan client)
-	leaving          = make(chan client) // channel for leaving clients
-	messages         = make(chan string) // all incoming client messages
-	usersChannel     = make(map[string]net.Conn)
+	leaving          = make(chan client)         // channel for leaving clients
+	messages         = make(chan string)         // all incoming client messages
+	usersChannel     = make(map[string]net.Conn) //Here come the connection per user
 )
 
 func broadcaster() {
@@ -78,18 +78,29 @@ func handleConn(conn net.Conn) {
 			fmt.Fprintf(conn, "irc-server > %s\n", time.Now().Format("Mon Jan _2 15:04:05 2006"))
 		} else if matches, _ := regexp.MatchString("/msg user[0-9]+ .+", msg); matches {
 			stringSlice := strings.Split(msg, " ")
-			lenSlice := len(stringSlice)
-			fmt.Println(stringSlice[1])
-			fmt.Printf("%T\n", stringSlice[1])
-			fmt.Println(lenSlice)
-			for i := 2; i < lenSlice; i++ {
-				fmt.Fprintf(usersChannel[stringSlice[1]], "%s ", stringSlice[i])
+			numberAsked := strings.Split(stringSlice[1], "r")
+			if value, _ := strconv.Atoi(numberAsked[1]); value > len(usersChannel) {
+				fmt.Fprintf(conn, "irc-server > No such user; use /users to see actual users\n")
+			} else {
+				lenSlice := len(stringSlice)
+				fmt.Println(stringSlice[1])
+				fmt.Printf("%T\n", stringSlice[1])
+				fmt.Println(lenSlice)
+				for i := 2; i < lenSlice; i++ {
+					fmt.Fprintf(usersChannel[stringSlice[1]], "%s ", stringSlice[i])
+				}
 			}
 			fmt.Fprintf(usersChannel[stringSlice[1]], "\n")
 		} else if matches, _ := regexp.MatchString("/user user[0-9]+", msg); matches {
-			fmt.Fprintf(conn, "Must return info for that user\n")
+			stringSlice := strings.Split(msg, " ")
+			numberAsked := strings.Split(stringSlice[1], "r")
+			if value, _ := strconv.Atoi(numberAsked[1]); value > len(usersChannel) {
+				fmt.Fprintf(conn, "irc-server > No such user; use /users to see actual users\n")
+			} else {
+				fmt.Fprintf(conn, "irc-server > name: %s, ip: %s\n", stringSlice[1], usersChannel[stringSlice[1]].RemoteAddr().String())
+			}
 		} else {
-			messages <- who + ": " + msg
+			messages <- who + "> " + msg
 		}
 	}
 	// NOTE: ignoring potential errors from input.Err()
