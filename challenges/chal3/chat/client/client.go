@@ -13,6 +13,11 @@ import (
 	"os"
 )
 
+var (
+	username   string
+	prefixName io.Reader
+)
+
 //!+
 func main() {
 	conn, err := net.Dial("tcp", "localhost:8000")
@@ -22,9 +27,10 @@ func main() {
 	done := make(chan struct{})
 	go func() {
 		io.Copy(os.Stdout, conn) // NOTE: ignoring errors
-		log.Println("done")
+		log.Println("Disconnected")
 		done <- struct{}{} // signal the main goroutine
 	}()
+	// go routine to send the info about my ip and that stuff
 	mustCopy(conn, os.Stdin)
 	conn.Close()
 	<-done // wait for background goroutine to finish
