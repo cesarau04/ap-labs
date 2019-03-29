@@ -14,7 +14,6 @@ import (
 	"log"
 	"net"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -64,7 +63,7 @@ func handleConn(conn net.Conn) {
 	input := bufio.NewScanner(conn)
 	for input.Scan() {
 		msg := input.Text()
-		fmt.Printf("DATA: %s\n", msg)
+
 		if msg == "/users" {
 			fmt.Fprintf(conn, "irc-server > ")
 			for key := range usersChannel {
@@ -73,36 +72,32 @@ func handleConn(conn net.Conn) {
 			fmt.Fprintln(conn, "")
 		} else if msg == "/time" {
 			fmt.Fprintf(conn, "irc-server > %s\n", time.Now().Format("Mon Jan _2 15:04:05 2006"))
-		} else if matches, _ := regexp.MatchString("^/msg user[0-9]+ .+", msg); matches {
+		} else if matches, _ := regexp.MatchString("^/msg .+ .+", msg); matches {
 			stringSlice := strings.Split(msg, " ")
-			numberAsked := strings.Split(stringSlice[1], "r")
-			if value, _ := strconv.Atoi(numberAsked[1]); value > len(usersChannel) {
-				fmt.Fprintf(conn, "irc-server > No such user; use /users to see actual users\n")
-			} else {
-				lenSlice := len(stringSlice)
-				fmt.Println(stringSlice[1])
-				fmt.Printf("%T\n", stringSlice[1])
-				fmt.Println(lenSlice)
-				fmt.Fprintf(usersChannel[stringSlice[1]], "%s [private] > ", who)
+			lenSlice := len(stringSlice)
+			if connection, ok := usersChannel[stringSlice[1]]; ok {
+				fmt.Fprintf(connection, "%s [privatemsg] > ", stringSlice[1])
 				for i := 2; i < lenSlice; i++ {
-					fmt.Fprintf(usersChannel[stringSlice[1]], "%s ", stringSlice[i])
+					fmt.Fprintf(connection, "%s ", stringSlice[i])
 				}
-			}
-			fmt.Fprintf(usersChannel[stringSlice[1]], "\n")
-		} else if matches, _ := regexp.MatchString("^/user user[0-9]+$", msg); matches {
-			stringSlice := strings.Split(msg, " ")
-			numberAsked := strings.Split(stringSlice[1], "r")
-			if value, _ := strconv.Atoi(numberAsked[1]); value > len(usersChannel) {
-				fmt.Fprintf(conn, "irc-server > No such user; use /users to see actual users\n")
+				fmt.Fprintln(connection, "")
 			} else {
+				fmt.Fprintf(conn, "irc-server > No such user; use /users to see actual users\n")
+			}
+		} else if matches, _ := regexp.MatchString("^/user .+$", msg); matches {
+			stringSlice := strings.Split(msg, " ")
+			if _, ok := usersChannel[stringSlice[1]]; ok {
 				fmt.Fprintf(conn, "irc-server > name: %s, ip: %s\n", stringSlice[1], usersChannel[stringSlice[1]].RemoteAddr().String())
+			} else {
+				fmt.Fprintf(conn, "irc-server > No such user; use /users to see actual users\n")
 			}
 		} else if matches, _ := regexp.MatchString("^<meta>.+", msg); matches {
+			// check if user is already picked!
 			stringSlice := strings.Split(msg, ">")
 			who = stringSlice[1]
 			messages <- "irc-server > [" + who + "] has arrived"
 			usersChannel[who] = conn
-			ch <- "You're connected! " + who + ""
+			ch <- "irc-server > You're connected! " + who + ""
 			entering <- ch
 			fmt.Printf("irc-server > New connected user [%s]\n", who)
 		} else {
