@@ -11,16 +11,19 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define PROC_PATH     "/proc/"
 #define FD_PATH       "/fd/"    //PROC_PATH + PID + FD_PATH
 #define MEMORY_PATH   "/statm"  //PROC_PATH + PID + MEMORY_PATH
 #define STATUS_PATH   "/status" 
-#define NAMEFILE_SIZE 25
-#define STATE_SIZE    12
-#define MAX_PATH_SIZE 25
+#define NAMEFILE_SIZE 128
+#define STATE_SIZE    20
+#define MAX_PATH_SIZE 50
 #define INT_TO_STR_SIZE 11
-#define BUFF_SIZE     512
+#define BUFF_SIZE     2048
+#define ATTR_SIZE     64
+#define INFO_SIZE     512
 
 
 void clear();
@@ -31,6 +34,7 @@ struct threadstruct *threadalloc(void);
 struct process *addnode(struct process *p, unsigned int *pid);
 unsigned int parseUnsigedInt(char * str);
 void treeprint(struct process *p);
+void treeclean(struct process *p);
 void *findInfoForProcess(void *argv);
 unsigned int countFds(char *path);
 
@@ -55,38 +59,47 @@ int threadsopen = 0;
 pthread_t threadslist[1000];
 
 int main(){
-	DIR *dir;
-	struct process *root;
-	struct dirent *pDirent;
-	unsigned int param;
-
-	root = NULL;
-	dir = opendir(PROC_PATH);
-	param = 0;
-	if (dir == NULL){
-		perror("opendir(); line 26");
-		exit(EXIT_FAILURE);
-	}
+	while(true){
+		DIR *dir;
+		struct process *root;
+		struct dirent *pDirent;
+		unsigned int param;
 	
-	while((pDirent = readdir(dir)) != NULL){
-		if (! (isDirectory(&pDirent->d_type) && hasPidFormat(pDirent->d_name)))
-			continue;
-		param = parseUnsigedInt(pDirent->d_name);
-		root = addnode(root, &param);	
+		root = NULL;
+		dir = opendir(PROC_PATH);
+		param = 0;
+		if (dir == NULL){
+			perror("opendir(); line 26");
+			exit(EXIT_FAILURE);
+		}
+		
+		while((pDirent = readdir(dir)) != NULL){
+			if (! (isDirectory(&pDirent->d_type) && hasPidFormat(pDirent->d_name)))
+				continue;
+			param = parseUnsigedInt(pDirent->d_name);
+			root = addnode(root, &param);	
+		}
+		closedir(dir);
+		for(int i = 0; i < threadsopen; i++){
+			pthread_join(threadslist[i], NULL);	
+		}
+		/*printf("| %-11s | %-11s | %-45s | %-20s | %-11s | %-11s | %-11s |\n", */
+				/*"PID", "PPID", "NAME", "STATUS", "MEMORY", "#THREADS", "OPENFILES");*/
+		/*for (int u = 0; u < 143; u++){*/
+			/*printf("-");*/
+		/*}*/
+		/*printf("-\n");*/
+		/*treeprint(root);*/
+		treeclean(root);
+		threadsopen = 0;
+		/*sleep(1);*/
+	  clear();
 	}
-
-	closedir(dir);
-
-	for(int i = 0; i < threadsopen; i++){
-		pthread_join(threadslist[i], NULL);	
-	}
-	//treeprint(root);
-	//clear();
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 void clear() {
-  printf("\e7"); 
+  printf("\e[1;1H\e[;f\e[2J"); 
 }
 
 bool isDirectory(unsigned char *type){
@@ -135,7 +148,7 @@ struct process *addnode(struct process *p, unsigned int *pid)
 			exit(EXIT_FAILURE);
 		}
 		threadsopen++;
-	} else if ((cond = (*pid > p->pid) ? -1 : 1 ) < 0) {
+	} else if ((cond = *pid > p->pid ? -1 : 1 ) < 0) {
 		p->left = addnode(p->left, pid);
 	} else {
 		p->right = addnode(p->right, pid);
@@ -157,8 +170,18 @@ void treeprint(struct process *p)
 {
 	if (p != NULL) {
 		treeprint(p->right);
-		printf("pod:%u\n", p->pid);
+		printf("| %-11u | %-11u | %-45s | %-20s | %-11uMB | %-11u | %-11u |\n", 
+			p->pid, p->ppid, p->p_name, p->state, (p->memory/1000), p->no_threads, p->no_openfd);
 		treeprint(p->left);
+	}
+}
+
+void treeclean(struct process *p)
+{
+	if (p != NULL) {
+		treeclean(p->right);
+		free(p);
+		treeclean(p->left);
 	}
 }
 
@@ -172,7 +195,7 @@ void *findInfoForProcess(void *param){
 	fdpath     = (char *) malloc(MAX_PATH_SIZE * sizeof(char));
 	pidstr     = (char *) malloc(INT_TO_STR_SIZE * sizeof(char));
 	buff       = (char *) malloc(BUFF_SIZE * sizeof(char));
-	dataph     = (char *) malloc(NAMEFILE_SIZE * sizeof(char));  //use the largest posible value to store
+	dataph     = (char *) malloc(BUFF_SIZE * sizeof(char));  //use the largest posible value to store
 
 	sprintf(pidstr, "%u", ts->mynode->pid);
 	strcpy(mempath, PROC_PATH);
@@ -184,14 +207,13 @@ void *findInfoForProcess(void *param){
 	strcat(statuspath, STATUS_PATH);
 	free(pidstr);	
 
-	// Read statm, for memory usage
 	int fd;
 	fd = open(mempath, O_RDONLY);
 	if (fd == -1){
 		printf("Couldn't open mempath: %s", mempath);
-		exit(EXIT_FAILURE);
+		ts->mynode->memory = 0; 
 	}
-	// This one is fast, just read the until the first ' ' and save to memory utilization
+
 	int i = 0;
 	while (read(fd, buff, BUFF_SIZE) > 0){
 		for (; buff[i] != ' '; i++){
@@ -200,30 +222,79 @@ void *findInfoForProcess(void *param){
 	}
 	dataph[i] = '\0';
 	ts->mynode->memory = parseUnsigedInt(dataph); 
-	//free(mempath);
+	free(mempath);
 	close(fd);
 	
 	ts->mynode->no_openfd = countFds(fdpath);
-	//free(fdpath);
+	free(fdpath);
 
 	fd = open(statuspath, O_RDONLY);
 	if (fd == -1){
 		printf("Couldn't open statuspath: %s", statuspath);
 		exit(EXIT_FAILURE);
 	}
-	
-	i = 0;
-	dataph[0] = '\0'; //Is even necessary?
-	char *attr;
-	attr = (char *) malloc(NAMEFILE_SIZE*sizeof(char));
+	free(statuspath);
+	char *attr, *info;
+	attr = (char *) malloc(ATTR_SIZE*sizeof(char));
+	info = (char *) malloc(INFO_SIZE*sizeof(char));
+	int offset = 0;
+	int opt;
 	while (read(fd, buff, BUFF_SIZE) > 0) {
+		i = 0;
 		for (; buff[i] != '\n'; i++){
-			dataph[i] = buff[i];		
+			dataph[i] = buff[i];	
 		}
 		dataph[i] = '\0';
+		offset += ++i;
+		lseek(fd, offset, SEEK_SET);
+		int j = 0;
+		for (; dataph[j] != ':' || dataph[j] != '\0'; j++){
+			printf("pid: %u\t j: %d\n", ts->pid, j);
+			attr[j] = dataph[j];
+		}
+		attr[j] = '\0';
+
+		if (strcmp(attr, "Name") == 0){
+			opt = 1;
+		} else if (strcmp(attr, "State") == 0){
+			opt = 2;
+		} else if (strcmp(attr, "Threads") == 0){
+			opt = 3;
+		} else if (strcmp(attr, "PPid") == 0){
+			opt = 4;
+		} else {
+			// memset(dataph, '\0', NAMEFILE_SIZE);
+			lseek(fd, offset, SEEK_SET);
+			continue;
+		}
+
+		int k = 0;
+		for (j++; dataph[j] != '\0'; j++){
+			if (isspace(dataph[j]) != 0){
+				continue;
+			}
+			info[k++] = dataph[j];
+		}
+		info[k]='\0';
+
+		switch (opt) {
+			case 1:
+				strcpy(ts->mynode->p_name, info);
+				break;
+			case 2:
+				strcpy(ts->mynode->state, info);
+				break;
+			case 3:
+				ts->mynode->no_threads = parseUnsigedInt(info);
+				break;
+			case 4:
+				ts->mynode->ppid = parseUnsigedInt(info);
+				break;
+		}
+		// memset(dataph, '\0', NAMEFILE_SIZE);
+
 	}
 	close(fd);
-	
 	return (void *) (size_t) ts->pid;
 }
 
