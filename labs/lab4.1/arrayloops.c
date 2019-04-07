@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "logger.h"
 
 #define NTHREADS      4
 #define ARRAYSIZE   1000000
@@ -28,7 +29,7 @@ void *do_work(void *tid)
     mytid = (int *) tid;
     start = (*mytid * ITERATIONS);
     end = start + ITERATIONS;
-    printf ("Thread %d doing iterations %d to %d\n",*mytid,start,end-1);
+    infof ("Thread %d doing iterations %d to %d\n",*mytid,start,end-1);
     for (i=start; i < end ; i++) {
 	a[i] = i * 1.0;
 	mysum = mysum + a[i];
@@ -62,13 +63,13 @@ int main(int argc, char *argv[])
     for (i=0; i<NTHREADS; i++) {
 	pthread_join(threads[i], NULL);
     }
-    printf ("Done. Sum= %e \n", sum);
+    infof ("Done. Sum= %e \n", sum);
 
     sum=0.0;
     for (i=0;i<ARRAYSIZE;i++){
 	a[i] = i*1.0;
 	sum = sum + a[i]; }
-    printf("Check Sum= %e\n",sum);
+    infof("Check Sum= %e\n",sum);
 
     /* Clean up and exit */
     pthread_attr_destroy(&attr);

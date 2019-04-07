@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "logger.h"
 
 /* Define and scope what needs to be seen by everyone */
 #define NUM_THREADS  3
@@ -38,13 +39,13 @@ void *sub1(void *t)
       work is now done within the mutex lock of count.
     */
     pthread_mutex_lock(&count_mutex);
-    printf("sub1: thread=%ld going into wait. count=%d\n",tid,count);
+    infof("sub1: thread=%ld going into wait. count=%d\n",tid,count);
     pthread_cond_wait(&count_condvar, &count_mutex);
-    printf("sub1: thread=%ld Condition variable signal received.",tid);
-    printf(" count=%d\n",count);
+    infof("sub1: thread=%ld Condition variable signal received.",tid);
+    infof(" count=%d\n",count);
     count++;
     finalresult += myresult;
-    printf("sub1: thread=%ld count now equals=%d myresult=%e. Done.\n",
+    infof("sub1: thread=%ld count now equals=%d myresult=%e. Done.\n",
 	   tid,count,myresult);
     pthread_mutex_unlock(&count_mutex);
     pthread_exit(NULL);
@@ -67,16 +68,16 @@ void *sub2(void *t)
 	   reached.  Note that this occurs while mutex is locked.
 	*/
 	if (count == THRESHOLD) {
-	    printf("sub2: thread=%ld Threshold reached. count=%d. ",tid,count);
+	    infof("sub2: thread=%ld Threshold reached. count=%d. ",tid,count);
 	    pthread_cond_signal(&count_condvar);
-	    printf("Just sent signal.\n");
+	    infof("Just sent signal.\n");
 	}
 	else {
-	    printf("sub2: thread=%ld did work. count=%d\n",tid,count);
+	    infof("sub2: thread=%ld did work. count=%d\n",tid,count);
 	}
 	pthread_mutex_unlock(&count_mutex);
     }
-    printf("sub2: thread=%ld  myresult=%e. Done. \n",tid,myresult);
+    infof("sub2: thread=%ld  myresult=%e. Done. \n",tid,myresult);
     pthread_exit(NULL);
 }
 
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
     for (i = 0; i < NUM_THREADS; i++) {
 	pthread_join(threads[i], NULL);
     }
-    printf ("Main(): Waited on %d threads. Final result=%e. Done.\n",
+    infof ("Main(): Waited on %d threads. Final result=%e. Done.\n",
 	    NUM_THREADS,finalresult);
 
     /* Clean up and exit */

@@ -89,7 +89,7 @@ int main (int argc, char *argv[])
     dotprod ();
 
     /* Print result and release storage */
-    printf ("Sum =  %f \n", dotstr.sum);
+    infof ("Sum =  %f \n", dotstr.sum);
     free (a);
     free (b);
 }

@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "logger.h"
 
 /*
      The following structure contains the necessary information
@@ -80,7 +81,7 @@ void *dotprod(void *arg)
     */
     pthread_mutex_lock (&mutexsum);
     dotstr.sum += mysum;
-    printf("Thread %ld did %d to %d:  mysum=%f global sum=%f\n",offset,start,end,mysum,dotstr.sum);
+    infof("Thread %ld did %d to %d:  mysum=%f global sum=%f\n",offset,start,end,mysum,dotstr.sum);
     pthread_mutex_unlock (&mutexsum);
 
     pthread_exit((void*) 0);
@@ -141,7 +142,7 @@ int main (int argc, char *argv[])
     }
     /* After joining, print out the results and cleanup */
 
-    printf ("Sum =  %f \n", dotstr.sum);
+    infof ("Sum =  %f \n", dotstr.sum);
     free (a);
     free (b);
     pthread_mutex_destroy(&mutexsum);

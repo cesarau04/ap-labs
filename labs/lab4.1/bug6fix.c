@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "logger.h"
 
 /* Define global data where everyone can see them */
 #define NUMTHRDS 8
@@ -33,13 +34,13 @@ void *dotprod(void *arg)
     end   = start + len;
 
     /* Perform my section of the dot product */
-    printf("thread: %ld starting. start=%d end=%d\n",tid,start,end-1);
+    infof("thread: %ld starting. start=%d end=%d\n",tid,start,end-1);
     for (i=start; i<end ; i++) {
 	pthread_mutex_lock(&mutexsum);
 	sum += (a[i] * b[i]);
 	pthread_mutex_unlock(&mutexsum);
     }
-    printf("thread: %ld done. Global sum now is=%li\n",tid,sum);
+    infof("thread: %ld done. Global sum now is=%li\n",tid,sum);
 
     pthread_exit((void*) 0);
 }
@@ -78,7 +79,7 @@ int main (int argc, char *argv[])
 	pthread_join(threads[i], &status);
     }
     /* After joining, print out the results and cleanup */
-    printf ("Final Global Sum=%li\n",sum);
+    infof ("Final Global Sum=%li\n",sum);
     free (a);
     free (b);
     pthread_mutex_destroy(&mutexsum);
