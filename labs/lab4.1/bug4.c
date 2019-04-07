@@ -28,6 +28,13 @@ void *sub1(void *t)
     long tid = (long)t;
     double myresult=0.0;
 
+		pthread_mutex_lock(&count_mutex);
+      while (count < THRESHOLD) {
+    infof("sub1: thread=%ld going into wait. count=%d\n",tid,count);
+    pthread_cond_wait(&count_condvar, &count_mutex);
+    infof("sub1: thread=%ld Condition variable signal received.",tid);
+    infof(" count=%d\n",count);
+      }
     /* do some work */
     sleep(1);
     /*
@@ -38,17 +45,12 @@ void *sub1(void *t)
       to prevent pthread_cond_wait from never returning, and that this thread's
       work is now done within the mutex lock of count.
     */
-    pthread_mutex_lock(&count_mutex);
-    infof("sub1: thread=%ld going into wait. count=%d\n",tid,count);
-    pthread_cond_wait(&count_condvar, &count_mutex);
-    infof("sub1: thread=%ld Condition variable signal received.",tid);
-    infof(" count=%d\n",count);
-    count++;
-    finalresult += myresult;
-    infof("sub1: thread=%ld count now equals=%d myresult=%e. Done.\n",
-	   tid,count,myresult);
-    pthread_mutex_unlock(&count_mutex);
-    pthread_exit(NULL);
+		count++;
+      finalresult += count;
+      infof("sub1: thread=%ld count now equals=%d finalresult=%e. Done.\n",
+             tid,count,finalresult);
+      pthread_mutex_unlock(&count_mutex);
+      pthread_exit(NULL);
 }
 
 void *sub2(void *t)
@@ -86,7 +88,7 @@ void *sub2(void *t)
 int main(int argc, char *argv[])
 {
     long t1=1, t2=2, t3=3;
-    int i, rc;
+    int i;
     pthread_t threads[3];
     pthread_attr_t attr;
 
