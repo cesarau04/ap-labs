@@ -16,11 +16,21 @@ int releaseLock(int lock);
 long dotProduct(long *vec1, long *vec2);
 long * multiply(long *matA, long *matB);
 int saveResultMatrix(long *result);
+void *threadFunc(void *arg);
 
 int NUM_BUFFERS; 
 long **buffers; 
 pthread_mutex_t *mutexes;
 long *result; 
+pthread_t threads[2000];
+
+struct DataStruct{
+	long *matA;
+	long *matB;
+	size_t rowPosition;
+	size_t colPosition;
+	long *result;
+};
 
 int main(int argc, char **argv)
 {
@@ -132,7 +142,24 @@ long dotProduct(long *vec1, long *vec2){
 
 long * multiply(long *matA, long *matB){
 	result  = (long *) malloc(4000000 * sizeof(long));
-	// HERE COMES THE MAGIC
+	
+	for (size_t i = 0; i < 2000; i++){
+		// Create threads
+		for (size_t j = 0; j < 2000; j++){
+			struct DataStruct *currentStruct;
+			currentStruct = (struct DataStruct *) malloc(sizeof(struct DataStruct));
+			currentStruct->matA = matA;
+			currentStruct->matB = matB;
+			currentStruct->rowPosition = i + 1;
+			currentStruct->colPosition = j + 1;
+			currentStruct->result = result;
+			pthread_create(&threads[j], NULL, threadFunc, (void *) currentStruct);
+		}
+		
+		// Wait threads
+		for (size_t j = 0; j < 2000; j++)
+			pthread_join(threads[j], NULL);
+	}
 	return NULL;
 }
 
@@ -153,5 +180,21 @@ int saveResultMatrix(long *result){ int fd;
 	}
 	return 0;
 }
+
+void *threadFunc(void *arg){
+	struct DataStruct *data = (struct DataStruct *) arg;
+	long *row, *col;
+	long index;
+
+	row = getRow(data->rowPosition, data->matA);
+	col = getColumn(data->colPosition, data->matB);
+	
+	index = ((((data->rowPosition - 1) * 2000) + data->colPosition) - 1); 
+	data->result[index] = dotProduct(row, col);
+	free(data);
+	return NULL;
+}
+
+
 
 
