@@ -52,12 +52,18 @@ int main(int argc, char **argv)
 		pthread_mutex_init(&mutexes[i], NULL);
 	}
 
+	infof("pthreads created\n");
+
 	long *matrixA, *matrixB;
 	matrixA = readMatrix("matA.dat");
 	matrixB = readMatrix("matB.dat");
+	
+	infof("matrices read\n");
 
 	result = multiply(matrixA, matrixB);
 	saveResultMatrix(result);
+
+	infof("saved result");
 
 	free(matrixA);
 	free(matrixB);
@@ -145,6 +151,7 @@ long * multiply(long *matA, long *matB){
 	
 	for (size_t i = 0; i < 2000; i++){
 		// Create threads
+		infof("DOTPRODUCT: row:%d\n", i);
 		for (size_t j = 0; j < 2000; j++){
 			struct DataStruct *currentStruct;
 			currentStruct = (struct DataStruct *) malloc(sizeof(struct DataStruct));
@@ -157,8 +164,10 @@ long * multiply(long *matA, long *matB){
 		}
 		
 		// Wait threads
+		infof("\tWaiting threads\n");
 		for (size_t j = 0; j < 2000; j++)
-			pthread_join(threads[j], NULL);
+			pthread_join(threads[j], NULL);		
+		infof("\tDone waiting\n\n");
 	}
 	return NULL;
 }
@@ -191,7 +200,10 @@ void *threadFunc(void *arg){
 	
 	index = ((((data->rowPosition - 1) * 2000) + data->colPosition) - 1); 
 	data->result[index] = dotProduct(row, col);
-	free(data);
+
+	free(row);
+	free(col);
+	free(arg);
 	return NULL;
 }
 
