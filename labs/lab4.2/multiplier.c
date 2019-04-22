@@ -39,14 +39,16 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	NUM_BUFFERS = strtol(argv[2], NULL, 10);
+	if (NUM_BUFFERS < 8){
+		errorf("NUM_BUFFERS Not allowed. Should be NUM_BUFFERS>8\n");
+		exit(EXIT_FAILURE);
+	}
 	infof("NUM_BUFFERS => %d\n", NUM_BUFFERS);
 
-	// TODO: allocate inside buffers
 	buffers = (long **)malloc(NUM_BUFFERS * sizeof(long *));
 	mutexes =
 	    (pthread_mutex_t *) malloc(NUM_BUFFERS * sizeof(pthread_mutex_t));
 
-	// TODO: Need to check if this works 
 	for (int i = 0; i < NUM_BUFFERS; i++) {
 		pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 		mutexes[i] = mutex;
@@ -138,7 +140,6 @@ int getLock(void)
 
 int releaseLock(int lock)
 {
-	// TODO: Release the buffer     
 	if (pthread_mutex_unlock(&mutexes[lock]) == 0) {
 		return 0;
 	}
@@ -158,7 +159,6 @@ long *multiply(long *matA, long *matB)
 	result = (long *)malloc(4000000 * sizeof(long));
 
 	for (size_t i = 0; i < 2000; i++) {
-		// Create threads
 		for (size_t j = 0; j < 2000; j++) {
 			struct DataStruct *currentStruct;
 			currentStruct =
@@ -173,7 +173,6 @@ long *multiply(long *matA, long *matB)
 				       (void *)currentStruct);
 		}
 
-		// Wait threads
 		for (size_t j = 0; j < 2000; j++)
 			pthread_join(threads[j], NULL);
 		printf("\r%ld%%", (i * 100) / 1999);
@@ -201,17 +200,21 @@ int saveResultMatrix(long *result)
 void *threadFunc(void *arg)
 {
 	struct DataStruct *data = (struct DataStruct *)arg;
-	long *row, *col;
 	long index;
 
-	row = getRow(data->rowPosition, data->matA);
-	col = getColumn(data->colPosition, data->matB);
-
+	int lock1, lock2;
+	while ((lock1 = getLock()) == -1);
+	while ((lock2 = getLock()) == -1);
+	buffers[lock1] = getRow(data->rowPosition, data->matA);
+	buffers[lock2] = getColumn(data->colPosition, data->matB);
+	
 	index = ((((data->rowPosition - 1) * 2000) + data->colPosition) - 1);
-	data->result[index] = dotProduct(row, col);
+	data->result[index] = dotProduct(buffers[lock1], buffers[lock2]);
 
-	free(row);
-	free(col);
+	free(buffers[lock1]);
+	free(buffers[lock2]);
 	free(arg);
+	while (releaseLock(lock1) != 0);
+	while (releaseLock(lock2) != 0);
 	return NULL;
 }
