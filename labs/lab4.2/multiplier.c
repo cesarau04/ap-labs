@@ -61,9 +61,9 @@ int main(int argc, char **argv)
 	infof("matrices read\n");
 
 	result = multiply(matrixA, matrixB);
+	infof("saving result...\n");
 	saveResultMatrix(result);
-
-	infof("saved result");
+	infof("result saved\n");
 
 	free(matrixA);
 	free(matrixB);
@@ -110,7 +110,7 @@ long * getColumn(int col, long *matrix){
 
 long * getRow(int row, long *matrix){
 	if (row < 0 || row > 2000){
-		panicf("row must be 0>row>2000\n");
+		panicf("row must bm 0>row>2000\n");
 		exit(EXIT_FAILURE);
 	}
 	size_t offset = ((2 * row) - 2) * 1000;
@@ -151,7 +151,6 @@ long * multiply(long *matA, long *matB){
 	
 	for (size_t i = 0; i < 2000; i++){
 		// Create threads
-		infof("DOTPRODUCT: row:%d\n", i);
 		for (size_t j = 0; j < 2000; j++){
 			struct DataStruct *currentStruct;
 			currentStruct = (struct DataStruct *) malloc(sizeof(struct DataStruct));
@@ -164,29 +163,27 @@ long * multiply(long *matA, long *matB){
 		}
 		
 		// Wait threads
-		infof("\tWaiting threads\n");
 		for (size_t j = 0; j < 2000; j++)
-			pthread_join(threads[j], NULL);		
-		infof("\tDone waiting\n\n");
+			pthread_join(threads[j], NULL);	
+		printf("\r%ld%%", (i*100)/1999);
+    fflush(stdout);
 	}
-	return NULL;
+	printf("\n");
+	return result;
 }
 
-int saveResultMatrix(long *result){ int fd;
-	fd = open("result.dat", O_WRONLY | O_CREAT);
-	if (fd == -1){
-		errorf("Couldn't create result.dat\n");
-		return -1;
+int saveResultMatrix(long *result){
+	FILE *f = fopen("result.dat", "w");
+	if (f == NULL)
+	{
+    errorf("error: couldn't open/create result.dat\n");
+    return -1;
 	}
-	for (int i = 0; i < 4000000; i++){
-		char buff[255];
-		sprintf(buff, "%ld\n", result[i]);
-		write(fd, buff, 255);
-	}
-	if (close(fd) != 0){
-		perror("error closing fd: ");
-		return -1;
-	}
+
+	for (size_t i = 0; i < 3999999; i++)
+		fprintf(f, "%ld\n", result[i]);
+
+	fclose(f);
 	return 0;
 }
 
