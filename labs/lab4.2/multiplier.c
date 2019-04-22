@@ -191,7 +191,7 @@ int saveResultMatrix(long *result)
 		return -1;
 	}
 
-	for (size_t i = 0; i < 3999999; i++)
+	for (size_t i = 0; i < 4000000; i++)
 		fprintf(f, "%ld\n", result[i]);
 
 	fclose(f);
